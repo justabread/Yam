@@ -13,7 +13,7 @@ int main(int argc, char *args[])
     if (!(IMG_Init(IMG_INIT_PNG)))
         std::cout << "SDL image failed to initialize: " << SDL_GetError() << std::endl;
 
-    RenderWindow window("Torque v0.0.1", 1280, 720);
+    RenderWindow window("Yamgine v0.0.1", 1280, 720);
 
     bool isRunning = true;
     SDL_Event event;
