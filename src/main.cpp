@@ -4,16 +4,23 @@
 #include <SDL2/SDL_image.h>
 
 #include "RenderWindow.hpp"
+#include "Utils.hpp"
+#include "Entity.hpp"
 
 int main(int argc, char *args[])
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cout << "SDL failed to initialize: " << SDL_GetError() << std::endl;}
+        Utils::ThrowErrorMessage("SDL failed to initialize: ");
+    }
 
-    if (!(IMG_Init(IMG_INIT_PNG)))
-        std::cout << "SDL image failed to initialize: " << SDL_GetError() << std::endl;
+    if (!(IMG_Init(IMG_INIT_PNG))) {
+        Utils::ThrowErrorMessage("SDL image failed to initialize: ");
+    }
 
     RenderWindow window("Yamgine v0.0.1", 1280, 720);
+
+    SDL_Texture* grassTexture = window.loadTexture("..\\res\\sprites\\ground_grass_1.png");
+    Entity platform0(100, 100, 2, grassTexture);
 
     bool isRunning = true;
     SDL_Event event;
@@ -27,6 +34,10 @@ int main(int argc, char *args[])
                     break;
             }
         }
+
+        window.clear();
+        window.render(platform0);
+        window.display();
     }
 
     window.cleanUp();
