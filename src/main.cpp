@@ -5,44 +5,12 @@
 #include <vector>
 #include <string>
 
-#include "GameMaster.hpp"
-#include "RenderWindow.hpp"
-#include "Utils.hpp"
-#include "Entity.hpp"
-#include "Player.hpp"
-#include "Math.hpp"
+#include "EntityStorage.hpp"
+#include "GameObjects/Entity.hpp"
+#include "GameObjects/Player.hpp"
+#include "GameObjects/Tile.hpp"
 
-const std::string APP_NAME = "Yam";
-const std::string VERSION = "v0.0.1";
-
-enum EntityTypes {
-    PLAYER,
-    ACTOR_ARRAY,
-    STATIC_OBJECT_ARRAY
-};
-
-RenderWindow InitWindow() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        Utils::ThrowErrorMessage("SDL failed to initialize: ");
-    }
-    if (!(IMG_Init(IMG_INIT_PNG))) {
-        Utils::ThrowErrorMessage("SDL image failed to initialize: ");
-    }
-
-    RenderWindow renderWindow(APP_NAME + " " + VERSION, Utils::SCREEN_WIDTH, Utils::SCREEN_HEIGHT);
-
-    return renderWindow;
-}
-
-void GameLoop(RenderWindow &renderWindow) {
-    // SDL_Texture* grassTexture = renderWindow.loadTexture("..\\res\\sprites\\ground_grass_1.png");
-
-    // std::vector<Entity> entities = {
-    //     Entity(Vector2f(0,0), grassTexture),
-    //     Entity(Vector2f(30,0), grassTexture),
-    //     Entity(Vector2f(30,30), grassTexture)
-    // };
-
+void GameLoop(EntityStorage* entityStorage) {
     bool isRunning = true;
     SDL_Event event;
 
@@ -67,10 +35,9 @@ void GameLoop(RenderWindow &renderWindow) {
                     default:
                         break;
                 }
-                for(auto &entityPair : GameMaster::entityBuffer) {
-                    switch(entityPair.first) {
-                        case PLAYER:
-                        entityPair.second->HandleEvent(event);
+                for(Entity* entity : entityStorage->GetRenderBuffer()) {
+                    if(dynamic_cast<Player*>(entity) != NULL){
+                        dynamic_cast<Player*>(entity)->HandleEvent(event, entityStorage);
                     }
                 }
             }
@@ -79,35 +46,37 @@ void GameLoop(RenderWindow &renderWindow) {
             time += deltaTime;
         }
         
-        renderWindow.clear();
+        entityStorage->GetRenderWindow().clear();
 
         //Render entities
-        for(auto &entityPair : GameMaster::entityBuffer) {
-            switch(entityPair.first) {
-                case PLAYER:
-                   entityPair.second->Move();
+        for(Entity* entity : entityStorage->GetRenderBuffer()) {
+            if(dynamic_cast<Player*>(entity) != NULL){
+                dynamic_cast<Player*>(entity)->Move();
             }
 
-            renderWindow.render(entityPair.second);
+            entityStorage->GetRenderWindow().render(entity);
         }
-        renderWindow.display();
+        entityStorage->GetRenderWindow().display();
     }   
 }
 
 int main(int argc, char *args[])
 {
-    //Instantiate the Game Master
-    GameMaster gameMaster = GameMaster();
+    //Create the entity storage object and pointer
+    EntityStorage entityStorage = EntityStorage();
+    EntityStorage* p_entityStorage = &entityStorage;
 
-    RenderWindow renderWindow = InitWindow();
-    SDL_Texture* playerTexture = renderWindow.loadTexture("..\\res\\sprites\\char.png");
+    //Create the player object and pointer
+    Player* player = new Player(Vector2f{0,0},2, 1, p_entityStorage->GetTexture(Utils::ActorType::PLAYER));
+    //Push grass tiles to render buffer
+    p_entityStorage->PushToRenderBuffer({
+        player,
+        new Tile(Vector2f{0,32}, 1, p_entityStorage->GetTexture(Utils::ActorType::GRASS))
+    });
 
-    //Create the player object
-    Entity* player = new Player(Vector2f(0,0), 4, Vector2f(0,0), playerTexture);
-    gameMaster.PushToEntityBuffer(PLAYER, player);
+    GameLoop(p_entityStorage);
 
-    GameLoop(renderWindow);
-
+    p_entityStorage->CleanUp();
     SDL_Quit();
     return 0;
 }

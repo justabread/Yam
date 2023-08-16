@@ -1,10 +1,16 @@
 #include <string>
 
 #include "RenderWindow.hpp"
-#include "Utils.hpp"
 
 RenderWindow::RenderWindow(std::string p_title, uint16_t p_w, uint16_t p_h) : window(NULL), renderer(NULL) {
     
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        Utils::ThrowErrorMessage("SDL failed to initialize: ");
+    }
+    if (!(IMG_Init(IMG_INIT_PNG))) {
+        Utils::ThrowErrorMessage("SDL image failed to initialize: ");
+    }
+
     window = SDL_CreateWindow(p_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, p_w, p_h, SDL_WINDOW_SHOWN);
 
     if(window == NULL) {

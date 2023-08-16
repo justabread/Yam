@@ -2,7 +2,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "Math.hpp"
+#include "Utilities/Math.hpp"
+#include "Utilities/Utils.hpp"
 
 class Entity {
 protected:
@@ -11,10 +12,16 @@ protected:
     SDL_Texture* tex;
     SDL_Rect currentFrame;
 public:
-    Entity(Vector2f _pos, int _scale, SDL_Texture* _tex); 
-
-    virtual void HandleEvent(SDL_Event &e) {};
-    virtual void Move() {};
+    Entity(Vector2f _pos, int _scale, SDL_Texture* _tex) : pos(_pos), scale(_scale), tex(_tex) {
+        currentFrame.x = 0;
+        currentFrame.y = 0;
+        currentFrame.w = Utils::ENTITY_SIZE;
+        currentFrame.h = Utils::ENTITY_SIZE;
+    }
+    
+    virtual ~Entity() {
+        std::cout << "Entity deleted" << std::endl;
+    }
 
     Vector2f GetPos() {
         return pos;
