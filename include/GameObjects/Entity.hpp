@@ -7,12 +7,12 @@
 
 class Entity {
 protected:
-    Vector2f pos;
+    SDL_Rect pos;
     int scale;
     SDL_Texture* tex;
     SDL_Rect currentFrame;
 public:
-    Entity(Vector2f _pos, int _scale, SDL_Texture* _tex) : pos(_pos), scale(_scale), tex(_tex) {
+    Entity(SDL_Rect _pos, int _scale, SDL_Texture* _tex) : pos(_pos), scale(_scale), tex(_tex) {
         currentFrame.x = 0;
         currentFrame.y = 0;
         currentFrame.w = Utils::ENTITY_SIZE;
@@ -23,8 +23,8 @@ public:
         std::cout << "Entity deleted" << std::endl;
     }
 
-    Vector2f GetPos() {
-        return pos;
+    SDL_Rect* GetPos() {
+        return &pos;
     };
 
     int GetScale() {
@@ -35,7 +35,7 @@ public:
         return tex;
     }
     
-    SDL_Rect GetCurrentFrame() {
-        return currentFrame;
+    SDL_Rect* GetCurrentFrame() {
+        return &currentFrame;
     }
 };

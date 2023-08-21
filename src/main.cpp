@@ -10,7 +10,8 @@
 #include "GameObjects/Player.hpp"
 #include "GameObjects/Tile.hpp"
 
-void GameLoop(EntityStorage* entityStorage) {
+void GameLoop() {
+
     bool isRunning = true;
     SDL_Event event;
 
@@ -35,29 +36,30 @@ void GameLoop(EntityStorage* entityStorage) {
                     default:
                         break;
                 }
-                for(Entity* entity : entityStorage->GetRenderBuffer()) {
+                for(Entity* entity :  EntityStorage::renderBuffer) {
                     if(dynamic_cast<Player*>(entity) != NULL){
-                        dynamic_cast<Player*>(entity)->HandleEvent(event, entityStorage);
+                        dynamic_cast<Player*>(entity)->HandleEvent(event);
                     }
                 }
             }
 
+            for(Entity* entity :  EntityStorage::renderBuffer) {
+                if(dynamic_cast<Player*>(entity) != NULL){
+                    dynamic_cast<Player*>(entity)->Move();
+                }
+            }
             accumulator -= deltaTime;
             time += deltaTime;
         }
         
-        entityStorage->GetRenderWindow().clear();
+        EntityStorage::renderWindow.clear();
 
         //Render entities
-        for(Entity* entity : entityStorage->GetRenderBuffer()) {
-            if(dynamic_cast<Player*>(entity) != NULL){
-                dynamic_cast<Player*>(entity)->Move();
-            }
-
-            entityStorage->GetRenderWindow().render(entity);
+        for(Entity* entity : EntityStorage::renderBuffer) {
+            EntityStorage::renderWindow.render(entity);
         }
-        entityStorage->GetRenderWindow().display();
-    }   
+        EntityStorage::renderWindow.display();
+    }
 }
 
 int main(int argc, char *args[])
@@ -67,15 +69,16 @@ int main(int argc, char *args[])
     EntityStorage* p_entityStorage = &entityStorage;
 
     //Create the player object and pointer
-    Player* player = new Player(Vector2f{0,0},2, 1, p_entityStorage->GetTexture(Utils::ActorType::PLAYER));
+    Player* player = new Player(SDL_Rect{160,680,Utils::ENTITY_SIZE,Utils::ENTITY_SIZE},2, 1, EntityStorage::textureStore.at(Utils::ActorType::PLAYER));
     //Push grass tiles to render buffer
     p_entityStorage->PushToRenderBuffer({
         player,
-        new Tile(Vector2f{0,32}, 1, p_entityStorage->GetTexture(Utils::ActorType::GRASS))
+        new Tile(SDL_Rect{80,0,Utils::ENTITY_SIZE,Utils::ENTITY_SIZE}, 1, EntityStorage::textureStore.at(Utils::ActorType::GRASS)),
+        new Tile(SDL_Rect{200,Utils::SCREEN_HEIGHT - Utils::ENTITY_SIZE,Utils::ENTITY_SIZE,Utils::ENTITY_SIZE}, 1, EntityStorage::textureStore.at(Utils::ActorType::GRASS)),
+        new Tile(SDL_Rect{200,Utils::SCREEN_HEIGHT - 132,Utils::ENTITY_SIZE,Utils::ENTITY_SIZE}, 1, EntityStorage::textureStore.at(Utils::ActorType::GRASS))
     });
 
-    GameLoop(p_entityStorage);
-
+    GameLoop();
     p_entityStorage->CleanUp();
     SDL_Quit();
     return 0;

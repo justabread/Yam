@@ -19,4 +19,8 @@ public:
     void render(Entity* entity);
     void display();
     SDL_Texture* loadTexture(std::string p_filePath);
+
+    SDL_Renderer* GetRenderer() {
+        return renderer;
+    }
 };
