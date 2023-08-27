@@ -47,7 +47,7 @@ void Player::Move() {
     //Jumping and gravity
     if(isJumping) {
         if(pos.y >= jumpStart - Utils::JUMP_HEIGHT){
-            vel.y = -10;
+            vel.y = -1;
         }else {
             isJumping = false;
             vel.y = 0;
@@ -71,7 +71,7 @@ void Player::Move() {
     if(
         (pos.y < 0) || 
         (pos.y + Utils::ENTITY_SIZE > Utils::SCREEN_HEIGHT) ||
-        (collidingInDirection[Utils::Direction::SOUTH] || collidingInDirection[Utils::Direction::NORTH])
+        ((collidingInDirection[Utils::Direction::SOUTH] && !isJumping) || collidingInDirection[Utils::Direction::NORTH])
     ) {
         pos.y -= vel.y;
         vel.y = 0;
